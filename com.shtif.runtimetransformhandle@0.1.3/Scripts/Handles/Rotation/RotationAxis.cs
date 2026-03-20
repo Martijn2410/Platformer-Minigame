@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace RuntimeHandle
 {
@@ -42,7 +43,7 @@ namespace RuntimeHandle
 
         public override void Interact(Vector3 p_previousPosition)
         {
-            Ray cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray cameraRay = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             
             if (!_axisPlane.Raycast(cameraRay, out float hitT))
             {
@@ -102,7 +103,7 @@ namespace RuntimeHandle
             _axisPlane = new Plane(_rotatedAxis, _parentTransformHandle.target.position);
 
             Vector3 startHitPoint;
-            Ray     cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray     cameraRay = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (_axisPlane.Raycast(cameraRay, out float hitT))
             {
                 startHitPoint = cameraRay.GetPoint(hitT);
