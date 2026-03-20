@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // Added to use the new Input System
 
 [RequireComponent(typeof(CharacterController))]
 public class ThirdPersonMovement : MonoBehaviour
@@ -9,6 +10,12 @@ public class ThirdPersonMovement : MonoBehaviour
     [Header("Jump & Gravity")]
     public float gravity = -9.81f;
     public float jumpHeight = 2f;
+
+    [Header("Input Actions")]
+    [Tooltip("Reference to the Move action (Vector2)")]
+    public InputActionReference moveAction;
+    [Tooltip("Reference to the Jump action (Button)")]
+    public InputActionReference jumpAction;
 
     public Transform cameraTransform;
 
@@ -30,6 +37,19 @@ public class ThirdPersonMovement : MonoBehaviour
         }
     }
 
+    // It is best practice to enable and disable your actions when the script is toggled
+    private void OnEnable()
+    {
+        if (moveAction != null) moveAction.action.Enable();
+        if (jumpAction != null) jumpAction.action.Enable();
+    }
+
+    private void OnDisable()
+    {
+        if (moveAction != null) moveAction.action.Disable();
+        if (jumpAction != null) jumpAction.action.Disable();
+    }
+
     void Update()
     {
         // Ground check
@@ -41,9 +61,11 @@ public class ThirdPersonMovement : MonoBehaviour
             velocity.y = -2f; // small downward force to keep grounded
         }
 
-        // Movement input
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        // --- NEW INPUT SYSTEM: Movement ---
+        // We read the Vector2 value directly from the action instead of using Input.GetAxis
+        Vector2 input = moveAction.action.ReadValue<Vector2>();
+        float horizontal = input.x;
+        float vertical = input.y;
 
         Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
 
@@ -66,8 +88,9 @@ public class ThirdPersonMovement : MonoBehaviour
             controller.Move(moveDirection * speed * Time.deltaTime);
         }
 
-        // Jump
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        // --- NEW INPUT SYSTEM: Jump ---
+        // WasPressedThisFrame() replaces Input.GetButtonDown()
+        if (jumpAction.action.WasPressedThisFrame() && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }

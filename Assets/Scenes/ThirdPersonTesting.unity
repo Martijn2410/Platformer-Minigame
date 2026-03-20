@@ -1841,6 +1841,8 @@ MonoBehaviour:
   rotationSpeed: 10
   gravity: -9.81
   jumpHeight: 2
+  moveAction: {fileID: 8040830135822704023, guid: 1e47f02810fb4e74c8fe1af13b1db7a3, type: 3}
+  jumpAction: {fileID: -7151362984788163433, guid: 1e47f02810fb4e74c8fe1af13b1db7a3, type: 3}
   cameraTransform: {fileID: 0}
   groundCheck: {fileID: 1004875371}
   groundDistance: 0.2
