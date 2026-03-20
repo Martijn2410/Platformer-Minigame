@@ -652,6 +652,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45f74579ed4049145b2d11eb04f2a8c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SelectTransformGizmo
+  clickAction: {fileID: -2123481900405691072, guid: 1e47f02810fb4e74c8fe1af13b1db7a3, type: 3}
+  pointerPositionAction: {fileID: -4740358559866749088, guid: 1e47f02810fb4e74c8fe1af13b1db7a3, type: 3}
   runtimeTransformHandle: {fileID: 0}
 --- !u!4 &777930961
 Transform:
@@ -662,7 +664,7 @@ Transform:
   m_GameObject: {fileID: 777930959}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.85937, y: 6.79, z: 18.6863}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

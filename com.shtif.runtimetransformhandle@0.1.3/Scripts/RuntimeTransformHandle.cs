@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem; // Added for the new Input System
 
 namespace RuntimeHandle
 {
     /**
      * Created by Peter @sHTiF Stefcek 21.10.2020
+     * Updated to Unity Input System Package
      */
     public class RuntimeTransformHandle : MonoBehaviour
     {
@@ -75,6 +77,9 @@ namespace RuntimeHandle
 
         void Update()
         {
+            // Safety check: Ensure a mouse is connected
+            if (Mouse.current == null) return;
+
             if (autoScale)
                 transform.localScale =
                     Vector3.one * (Vector3.Distance(handleCamera.transform.position, transform.position) * autoScaleFactor) / 15;
@@ -93,24 +98,30 @@ namespace RuntimeHandle
 
             HandleOverEffect(handle);
 
-            if (Input.GetMouseButton(0) && _draggingHandle != null)
+            // --- NEW INPUT SYSTEM: Reading Mouse States ---
+            bool isMouseHeld = Mouse.current.leftButton.isPressed;
+            bool isMouseDown = Mouse.current.leftButton.wasPressedThisFrame;
+            bool isMouseUp = Mouse.current.leftButton.wasReleasedThisFrame;
+
+            if (isMouseHeld && _draggingHandle != null)
             {
                 _draggingHandle.Interact(_previousMousePosition);
             }
 
-            if (Input.GetMouseButtonDown(0) && handle != null)
+            if (isMouseDown && handle != null)
             {
                 _draggingHandle = handle;
                 _draggingHandle.StartInteraction(hitPoint);
             }
 
-            if (Input.GetMouseButtonUp(0) && _draggingHandle != null)
+            if (isMouseUp && _draggingHandle != null)
             {
                 _draggingHandle.EndInteraction();
                 _draggingHandle = null;
             }
 
-            _previousMousePosition = Input.mousePosition;
+            // --- NEW INPUT SYSTEM: Reading Mouse Position ---
+            _previousMousePosition = Mouse.current.position.ReadValue();
 
             transform.position = target.transform.position;
             if (space == HandleSpace.LOCAL || type == HandleType.SCALE)
@@ -140,7 +151,12 @@ namespace RuntimeHandle
 
         private void GetHandle(ref HandleBase p_handle, ref Vector3 p_hitPoint)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Mouse.current == null) return;
+
+            // --- NEW INPUT SYSTEM: ScreenPointToRay with Mouse.current ---
+            Vector2 mousePosition = Mouse.current.position.ReadValue();
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+            
             RaycastHit[] hits = Physics.RaycastAll(ray);
             if (hits.Length == 0)
                 return;

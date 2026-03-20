@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace RuntimeHandle
 {
@@ -49,7 +50,8 @@ namespace RuntimeHandle
 
         public override void Interact(Vector3 p_previousPosition)
         {
-            Ray cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            // OLD: Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray cameraRay = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
 
             float   closestT = HandleMathUtils.ClosestPointOnRay(_raxisRay, cameraRay);
             Vector3 hitPoint = _raxisRay.GetPoint(closestT);
@@ -89,7 +91,8 @@ namespace RuntimeHandle
             
             _raxisRay = new Ray(_startPosition, raxis);
 
-            Ray cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            // OLD: Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray cameraRay = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
 
             float closestT = HandleMathUtils.ClosestPointOnRay(_raxisRay, cameraRay);
             Vector3 hitPoint = _raxisRay.GetPoint(closestT);
