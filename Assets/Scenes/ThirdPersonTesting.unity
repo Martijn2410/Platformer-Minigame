@@ -217,6 +217,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TriggerTest
   cameraManager: {fileID: 319688128}
+  selectTransformGizmo: {fileID: 777930960}
 --- !u!65 &412454703
 BoxCollider:
   m_ObjectHideFlags: 0

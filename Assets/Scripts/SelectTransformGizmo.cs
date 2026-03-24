@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem; // Added for the new Input System
 using RuntimeHandle;
+using System;
 
 public class SelectTransformGizmo : MonoBehaviour
 {
@@ -67,25 +68,42 @@ public class SelectTransformGizmo : MonoBehaviour
         Vector2 screenPosition = pointerPositionAction.action.ReadValue<Vector2>();
         Ray ray = Camera.main.ScreenPointToRay(screenPosition);
 
-        // Then check normal objects
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            Transform target = hit.transform;
+        // Resolve hits from nearest to farthest so front-most targets win.
+        RaycastHit[] hits = Physics.RaycastAll(ray);
+        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-            if (target.CompareTag("Selectable"))
-            {
-                Select(target);
-            }
-            else
-            {
-                Deselect();
-            }
-        }
-        else
+        foreach (RaycastHit currentHit in hits)
         {
-            // Clicked empty space
-            Deselect();
+            Transform selectableTarget = GetSelectableTarget(currentHit.transform);
+            if (selectableTarget != null)
+            {
+                Select(selectableTarget);
+                return;
+            }
+
+            if (currentHit.transform.gameObject.layer == runtimeTransformLayer ||
+                currentHit.transform.GetComponentInParent<HandleBase>() != null)
+            {
+                return;
+            }
         }
+
+        // No selectable object or gizmo was hit.
+        Deselect();
+    }
+
+    Transform GetSelectableTarget(Transform hitTransform)
+    {
+        Transform current = hitTransform;
+        while (current != null)
+        {
+            if (current.CompareTag("Selectable"))
+                return current;
+
+            current = current.parent;
+        }
+
+        return null;
     }
 
     void Select(Transform target)
@@ -110,6 +128,11 @@ public class SelectTransformGizmo : MonoBehaviour
 
         selection = null;
         runtimeTransformGameObj.SetActive(false);
+    }
+
+    public void DeselectCurrent()
+    {
+        Deselect();
     }
 
     // Cleaner recursive version (no depth limit)

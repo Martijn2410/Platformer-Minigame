@@ -11,6 +11,7 @@ public class TriggerTest : MonoBehaviour
 //     }
 
     public CameraManager cameraManager;
+    public SelectTransformGizmo selectTransformGizmo;
     private Renderer render;
     private Color originalColor;
 
@@ -40,6 +41,10 @@ public class TriggerTest : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             cameraManager.SwitchCamera(cameraManager.thirdPersonCam);
             Cursor.visible = false;
+            if (selectTransformGizmo != null)
+            {
+                selectTransformGizmo.DeselectCurrent();
+            }
             Debug.Log("Exited trigger");
         }
     }
