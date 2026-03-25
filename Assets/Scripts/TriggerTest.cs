@@ -26,6 +26,10 @@ public class TriggerTest : MonoBehaviour
         if (other.CompareTag("Player")) // optional but recommended
         {
             render.material.color = Color.green;
+            if (selectTransformGizmo != null)
+            {
+                selectTransformGizmo.ApplySelectableObjectsMaterial();
+            }
             Cursor.lockState = CursorLockMode.None;
             cameraManager.SwitchCamera(cameraManager.builderCam);
             Cursor.visible = true;
@@ -44,6 +48,7 @@ public class TriggerTest : MonoBehaviour
             if (selectTransformGizmo != null)
             {
                 selectTransformGizmo.DeselectCurrent();
+                selectTransformGizmo.RestoreSelectableObjectsMaterial();
             }
             Debug.Log("Exited trigger");
         }

@@ -3,6 +3,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem; // Added for the new Input System
 using RuntimeHandle;
 using System;
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class SelectTransformGizmo : MonoBehaviour
 {
@@ -12,7 +14,17 @@ public class SelectTransformGizmo : MonoBehaviour
     [Tooltip("Reference to the pointer's screen position (Vector2)")]
     public InputActionReference pointerPositionAction;
 
+    [Header("Selection Visual")]
+    [Tooltip("Material added on selection to render the object outline.")]
+    public Material selectionOutlineMaterial;
+
+    [Header("Selectable Objects Visual")]
+    [Tooltip("Material added on top of existing materials for objects tagged Selectable.")]
+    public Material selectableObjectsMaterial;
+
     private Transform selection;
+    private readonly Dictionary<Renderer, Material[]> originalSharedMaterials = new Dictionary<Renderer, Material[]>();
+    private readonly Dictionary<Renderer, Material[]> originalSelectableSharedMaterials = new Dictionary<Renderer, Material[]>();
 
     private GameObject runtimeTransformGameObj;
     public RuntimeTransformHandle runtimeTransformHandle;
@@ -48,6 +60,9 @@ public class SelectTransformGizmo : MonoBehaviour
     {
         if (clickAction != null) clickAction.action.Disable();
         if (pointerPositionAction != null) pointerPositionAction.action.Disable();
+
+        Deselect();
+        RestoreSelectableObjectsMaterial();
     }
 
     void Update()
@@ -111,7 +126,10 @@ public class SelectTransformGizmo : MonoBehaviour
         if (selection == target)
             return;
 
+        ClearSelectionOutline();
+
         selection = target;
+        ApplySelectionOutline(selection);
 
         runtimeTransformHandle.target = selection;
 
@@ -126,8 +144,16 @@ public class SelectTransformGizmo : MonoBehaviour
         if (selection == null)
             return;
 
+        ClearSelectionOutline();
         selection = null;
+        runtimeTransformHandle.target = null;
         runtimeTransformGameObj.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        ClearSelectionOutline();
+        RestoreSelectableObjectsMaterial();
     }
 
     public void DeselectCurrent()
@@ -143,6 +169,104 @@ public class SelectTransformGizmo : MonoBehaviour
         foreach (Transform child in obj.transform)
         {
             SetLayerRecursively(child.gameObject, layer);
+        }
+    }
+
+    void ApplySelectionOutline(Transform target)
+    {
+        if (selectionOutlineMaterial == null || target == null)
+            return;
+
+        Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer renderer in renderers)
+        {
+            Material[] original = renderer.sharedMaterials;
+            if (original == null || original.Length == 0)
+                continue;
+
+            // Skip if already outlined.
+            if (original[original.Length - 1] == selectionOutlineMaterial)
+                continue;
+
+            originalSharedMaterials[renderer] = original;
+
+            Material[] outlined = new Material[original.Length + 1];
+            Array.Copy(original, outlined, original.Length);
+            outlined[outlined.Length - 1] = selectionOutlineMaterial;
+            renderer.sharedMaterials = outlined;
+        }
+    }
+
+    void ClearSelectionOutline()
+    {
+        foreach (KeyValuePair<Renderer, Material[]> entry in originalSharedMaterials)
+        {
+            if (entry.Key != null)
+                entry.Key.sharedMaterials = entry.Value;
+        }
+
+        originalSharedMaterials.Clear();
+    }
+
+    public void ApplySelectableObjectsMaterial()
+    {
+        RestoreSelectableObjectsMaterial();
+
+        if (selectableObjectsMaterial == null)
+            return;
+
+        HashSet<Renderer> selectableRenderers = new HashSet<Renderer>();
+        GameObject[] rootObjects = SceneManager.GetActiveScene().GetRootGameObjects();
+
+        foreach (GameObject rootObject in rootObjects)
+        {
+            CollectSelectableRenderers(rootObject.transform, selectableRenderers);
+        }
+
+        foreach (Renderer renderer in selectableRenderers)
+        {
+            if (renderer == null)
+                continue;
+
+            Material[] original = renderer.sharedMaterials;
+            if (original == null || original.Length == 0)
+                continue;
+
+            originalSelectableSharedMaterials[renderer] = original;
+
+            Material[] overlaid = new Material[original.Length + 1];
+            Array.Copy(original, overlaid, original.Length);
+            overlaid[overlaid.Length - 1] = selectableObjectsMaterial;
+
+            renderer.sharedMaterials = overlaid;
+        }
+    }
+
+    public void RestoreSelectableObjectsMaterial()
+    {
+        foreach (KeyValuePair<Renderer, Material[]> entry in originalSelectableSharedMaterials)
+        {
+            if (entry.Key != null)
+                entry.Key.sharedMaterials = entry.Value;
+        }
+
+        originalSelectableSharedMaterials.Clear();
+    }
+
+    void CollectSelectableRenderers(Transform current, HashSet<Renderer> selectableRenderers)
+    {
+        if (current.CompareTag("Selectable"))
+        {
+            Renderer[] renderers = current.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer renderer in renderers)
+            {
+                selectableRenderers.Add(renderer);
+            }
+        }
+
+        foreach (Transform child in current)
+        {
+            CollectSelectableRenderers(child, selectableRenderers);
         }
     }
 }

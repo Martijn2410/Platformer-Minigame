@@ -1111,6 +1111,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SelectTransformGizmo
   clickAction: {fileID: -2123481900405691072, guid: 1e47f02810fb4e74c8fe1af13b1db7a3, type: 3}
   pointerPositionAction: {fileID: -4740358559866749088, guid: 1e47f02810fb4e74c8fe1af13b1db7a3, type: 3}
+  selectionOutlineMaterial: {fileID: 2100000, guid: 207e77ca1afe5d54ba1c692b46786c98, type: 2}
+  selectableObjectsMaterial: {fileID: 2100000, guid: 75a0fa38637161842822e929455d38a2, type: 2}
   runtimeTransformHandle: {fileID: 0}
 --- !u!4 &777930961
 Transform:
