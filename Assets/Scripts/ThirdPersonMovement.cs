@@ -10,6 +10,8 @@ public class ThirdPersonMovement : MonoBehaviour
     [Header("Jump & Gravity")]
     public float gravity = -9.81f;
     public float jumpHeight = 2f;
+    public float fallMultiplier = 2.5f;
+    public float lowJumpMultiplier = 2f;
 
     [Header("Input Actions")]
     [Tooltip("Reference to the Move action (Vector2)")]
@@ -95,8 +97,20 @@ public class ThirdPersonMovement : MonoBehaviour
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
-        // Gravity
-        velocity.y += gravity * Time.deltaTime;
+        // Apply stronger downward acceleration for tighter, less floaty jumps.
+        bool jumpHeld = jumpAction != null && jumpAction.action.IsPressed();
+        float gravityScale = 1f;
+
+        if (velocity.y < 0f)
+        {
+            gravityScale = fallMultiplier;
+        }
+        else if (velocity.y > 0f && !jumpHeld)
+        {
+            gravityScale = lowJumpMultiplier;
+        }
+
+        velocity.y += gravity * gravityScale * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
 }
