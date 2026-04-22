@@ -39,7 +39,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _GlowStrength: 2
-    - _PulseSpeed: 1
+    - _PulseSpeed: 2
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
